@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Than Store - Aplikasi Premium</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #001f3f 0%, #0a2540 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 31, 63, 0.95);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4a90e2;
+            letter-spacing: 1px;
+        }
+
+        .cart-btn {
+            background: #1e3a5f;
+            border: 2px solid #4a90e2;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .cart-btn:active {
+            background: #4a90e2;
+            transform: scale(1.1);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 16px;
+            color: #4a90e2;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #b0b0b0;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .products {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+        }
+
+        .product-card {
+            background: rgba(30, 58, 95, 0.4);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .product-card.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .product-card:active {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(74, 144, 226, 0.2);
+            border-color: #4a90e2;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .product-img:active {
+            transform: scale(1.1);
+        }
+
+        .product-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #4a90e2;
+        }
+
+        .product-duration {
+            color: #b0b0b0;
+            margin-bottom: 12px;
+        }
+
+        .product-price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #5dade2;
+            margin-bottom: 16px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+
+        .quantity-btn {
+            background: #1e3a5f;
+            border: 1px solid #4a90e2;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-btn:active {
+            background: #4a90e2;
+            transform: scale(1.1);
+        }
+
+        .quantity-display {
+            font-size: 18px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-checkout {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-checkout:active {
+            background: #2ecc71;
+            transform: scale(1.1);
+        }
+
+        .btn-cart {
+            background: #1e3a5f;
+            color: white;
+            border: 2px solid #4a90e2;
+        }
+
+        .btn-cart:active {
+            background: #4a90e2;
+            transform: scale(1.1);
+        }
+
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .cart-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .cart-content {
+            background: #001f3f;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 450px;
+            width: 85%;
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 2px solid #4a90e2;
+            transform: scale(0.9);
+            transition: transform 0.2s ease;
+        }
+
+        .cart-modal.show .cart-content {
+            transform: scale(1);
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cart-title {
+            font-size: 22px;
+            color: #4a90e2;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .close-btn:active {
+            color: #e74c3c;
+            transform: scale(1.1);
+        }
+
+        .cart-item {
+            background: rgba(30, 58, 95, 0.4);
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+        }
+
+        .cart-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 10px;
+        }
+
+        .cart-item-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4a90e2;
+            flex: 1;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .remove-btn:active {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .cart-item-details {
+            color: #b0b0b0;
+            font-size: 13px;
+        }
+
+        .cart-total {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #4a90e2;
+            font-size: 20px;
+            font-weight: bold;
+            color: #5dade2;
+        }
+
+        .cart-checkout-btn {
+            width: 100%;
+            padding: 14px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .cart-checkout-btn:active {
+            background: #2ecc71;
+            transform: scale(1.1);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 30px;
+            color: #b0b0b0;
+            font-size: 14px;
+        }
+
+        .footer {
+            background: rgba(0, 31, 63, 0.95);
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 60px;
+            border-top: 2px solid #4a90e2;
+        }
+
+        .footer-contact {
+            font-size: 16px;
+            color: #b0b0b0;
+            margin-bottom: 10px;
+        }
+
+        .footer-wa {
+            color: #4a90e2;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 31, 63, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #4a90e2 0%, #2e6eb8 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #5dade2 0%, #4a90e2 100%);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">THAN STORE</div>
+                <button class="cart-btn" onclick="toggleCart()">
+                    Keranjang
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>THAN STORE</h1>
+            <p>Menjual Segala Aplikasi Premium Kebutuhan Anda</p>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="<produc></produc>ts" id="products"></div>
+    </section>
+
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2 class="cart-title">Keranjang Belanja</h2>
+                <button class="close-btn" onclick="toggleCart()">&times;</button>
+            </div>
+            <div id="cartItems"></div>
+            <div class="cart-total" id="cartTotal"></div>
+            <button class="cart-checkout-btn" onclick="checkoutCart()">Checkout Semua</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-contact">Hubungi Kami</div>
+            <div class="footer-wa">WhatsApp: 0852-7025-1274</div>
+        </div>
+    </footer>
+
+    <script>
+        const products = [
+            { name: 'Netflix', duration: '1 Bulan', price: 25000, img: 'netflix.png' },
+            { name: 'Vidio', duration: '1 Bulan', price: 30000, img: 'vidio.png' },
+            { name: 'We TV', duration: '1 Bulan', price: 20000, img: 'wetv.png' },
+            { name: 'Viu', duration: '1 Bulan', price: 15000, img: 'viu.png' },
+            { name: 'Capcut', duration: '1 Minggu', price: 15000, img: 'capcut.png' },
+            { name: 'Prime Video', duration: '1 Bulan', price: 15000, img: 'prime.png' },
+            { name: 'Canva', duration: '1 Bulan', price: 12000, img: 'canva.png' }
+        ];
+
+        let cart = [];
+        let quantities = {};
+
+        products.forEach(p => {
+            quantities[p.name] = 1;
+        });
+
+        function renderProducts() {
+            const container = document.getElementById('products');
+            container.innerHTML = products.map((product, index) => `
+                <div class="product-card" style="transition-delay: ${index * 0.1}s">
+                    <img src="${product.img}" alt="${product.name}" class="product-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%231e3a5f%22 width=%22200%22 height=%22200%22 rx=%2210%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2224%22 fill=%22%234a90e2%22%3E${product.name}%3C/text%3E%3C/svg%3E'">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-duration">${product.duration}</div>
+                    <div class="product-price">Rp ${product.price.toLocaleString('id-ID')}</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity('${product.name}', -1)">-</button>
+                        <span class="quantity-display" id="qty-${product.name}">${quantities[product.name]}</span>
+                        <button class="quantity-btn" onclick="changeQuantity('${product.name}', 1)">+</button>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn btn-checkout" onclick="checkoutDirect('${product.name}')">Checkout</button>
+                        <button class="btn btn-cart" onclick="addToCart('${product.name}')">Keranjang</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            setTimeout(() => {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.classList.add('fade-in');
+                });
+            }, 50);
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.product-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        function changeQuantity(productName, delta) {
+            quantities[productName] = Math.max(1, quantities[productName] + delta);
+            document.getElementById(`qty-${productName}`).textContent = quantities[productName];
+        }
+
+        function addToCart(productName) {
+            const product = products.find(p => p.name === productName);
+            const quantity = quantities[productName];
+            
+            const existingItem = cart.find(item => item.name === productName);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({ ...product, quantity });
+            }
+            
+            updateCartDisplay();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartCount = document.getElementById('cartCount');
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="empty-cart">Keranjang masih kosong</div>';
+                cartTotal.innerHTML = '';
+            } else {
+                cartItems.innerHTML = cart.map((item, index) => `
+                    <div class="cart-item">
+                        <div class="cart-item-header">
+                            <span class="cart-item-name">${item.name}</span>
+                            <button class="remove-btn" onclick="removeFromCart(${index})">Hapus</button>
+                        </div>
+                        <div class="cart-item-details">
+                            ${item.duration} - ${item.quantity}x - Rp ${(item.price * item.quantity).toLocaleString('id-ID')}
+                        </div>
+                    </div>
+                `).join('');
+                
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                cartTotal.innerHTML = `Total: Rp ${total.toLocaleString('id-ID')}`;
+            }
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            if (modal.classList.contains('show')) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 200);
+            } else {
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            }
+        }
+
+        function checkoutDirect(productName) {
+            const product = products.find(p => p.name === productName);
+            const quantity = quantities[productName];
+            const total = product.price * quantity;
+            
+            const message = `Halo, mau beli ${product.name} sebanyak ${quantity} dengan harga Rp ${total.toLocaleString('id-ID')}, minta nomor pembayaran/qris`;
+            const whatsappUrl = `https://wa.me/6285270251274?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function checkoutCart() {
+            if (cart.length === 0) {
+                alert('Keranjang masih kosong');
+                return;
+            }
+            
+            const productNames = cart.map(item => item.name).join(' + ');
+            const quantities = cart.map(item => `${item.quantity}`).join(', ');
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const message = `Halo, mau beli ${productNames} sebanyak ${quantities} dengan harga Rp ${total.toLocaleString('id-ID')}, minta nomor pembayaran/qris`;
+            const whatsappUrl = `https://wa.me/6285270251274?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        document.getElementById('cartModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleCart();
+            }
+        });
+
+        renderProducts();
+    </script>
+</body>
+</html>
