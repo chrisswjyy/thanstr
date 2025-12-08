@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThanAssistant - AI Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #001f3f 0%, #0a2540 100%);
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(0, 31, 63, 0.95);
+            padding: 16px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #4a90e2;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .back-btn:active {
+            background: rgba(74, 144, 226, 0.2);
+            transform: scale(1.1);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a90e2 0%, #2e6eb8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .message-content {
+            background: rgba(30, 58, 95, 0.5);
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: rgba(39, 174, 96, 0.3);
+        }
+
+        .typing-indicator {
+            display: none;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-indicator.show {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4a90e2;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .input-container {
+            background: rgba(0, 31, 63, 0.95);
+            padding: 16px 20px;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-box {
+            flex: 1;
+            background: rgba(30, 58, 95, 0.5);
+            border: 1px solid #4a90e2;
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #e0e0e0;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            resize: none;
+            max-height: 120px;
+            min-height: 44px;
+        }
+
+        .input-box:focus {
+            border-color: #5dade2;
+            background: rgba(30, 58, 95, 0.7);
+        }
+
+        .send-btn, .stop-btn {
+            background: linear-gradient(135deg, #4a90e2 0%, #2e6eb8 100%);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .stop-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            display: none;
+        }
+
+        .send-btn:active, .stop-btn:active {
+            transform: scale(1.1);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #b0b0b0;
+        }
+
+        .welcome-message h2 {
+            color: #4a90e2;
+            margin-bottom: 12px;
+            font-size: 24px;
+        }
+
+        .welcome-message p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 31, 63, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #4a90e2 0%, #2e6eb8 100%);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .title {
+                font-size: 18px;
+            }
+
+            .chat-container {
+                padding: 16px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .send-btn, .stop-btn {
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn">←</a>
+            <div class="title">ThanAssistant</div>
+        </div>
+    </header>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="welcome-message">
+            <h2>Halo, saya ThanAssistant</h2>
+            <p>Saya siap membantu Anda dengan informasi produk Than Store. Silakan tanyakan apa saja tentang aplikasi premium yang kami jual.</p>
+        </div>
+    </div>
+
+    <div class="input-container">
+        <textarea class="input-box" id="inputBox" placeholder="Ketik pesan Anda..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn">Kirim</button>
+        <button class="stop-btn" id="stopBtn">Stop</button>
+    </div>
+
+    <script>
+        class ThanAssistant {
+            constructor() {
+                this.API_URL = 'https://api.elrayyxml.web.id/api/ai/chatgpt';
+                
+                this.chatContainer = document.getElementById('chatContainer');
+                this.inputBox = document.getElementById('inputBox');
+                this.sendBtn = document.getElementById('sendBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                
+                this.messageCounter = 0;
+                this.currentTypewriterInterval = null;
+                this.currentAbortController = null;
+                this.isGenerating = false;
+                
+                this.systemPrompt = `Kamu adalah ThanAssistant, asisten virtual untuk Than Store. Than Store adalah toko yang menjual aplikasi premium dengan owner bernama Than.
+
+Informasi produk dan harga yang dijual:
+1. Netflix - 1 Bulan: Rp 25.000
+2. Vidio - 1 Bulan: Rp 30.000
+3. We TV - 1 Bulan: Rp 20.000
+4. Viu - 1 Bulan: Rp 15.000
+5. Capcut - 1 Minggu: Rp 15.000
+6. Prime Video - 1 Bulan: Rp 15.000
+7. Canva - 1 Bulan: Rp 12.000
+8. Vision+ - 1 Bulan: Rp 20.000
+9. Disney+ - 1 Bulan: Rp 60.000
+10. Alight Motion Premium - 1 Tahun: Rp 12.000
+
+Kontak WhatsApp: 0852-7025-1274
+
+Aturan penting:
+- Jangan gunakan emoji dalam respons
+- Jika user bertanya tentang owner tidak membalas chat atau kenapa owner tidak merespons, jawab: "mungkin dia lagi sibuk"
+- Berikan informasi yang akurat tentang produk dan harga
+- Bantu user dengan ramah dan profesional
+- Jika ditanya tentang hal di luar produk Than Store, tetap berikan respons yang membantu tapi ingatkan fokus pada produk kami`;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.autoResizeTextarea();
+                this.inputBox.focus();
+            }
+
+            setupEventListeners() {
+                this.sendBtn.addEventListener('click', () => this.handleSend());
+                this.stopBtn.addEventListener('click', () => this.stopGeneration());
+                
+                this.inputBox.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.handleSend();
+                    }
+                });
+
+                this.inputBox.addEventListener('input', () => {
+                    this.autoResizeTextarea();
+                });
+            }
+
+            autoResizeTextarea() {
+                this.inputBox.style.height = 'auto';
+                this.inputBox.style.height = Math.min(this.inputBox.scrollHeight, 120) + 'px';
+            }
+
+            async handleSend() {
+                const message = this.inputBox.value.trim();
+                if (!message || this.isGenerating) return;
+
+                this.setGeneratingState(true);
+                
+                this.addMessage(message, true);
+                this.inputBox.value = '';
+                this.autoResizeTextarea();
+
+                this.showTypingIndicator();
+
+                try {
+                    this.currentAbortController = new AbortController();
+                    
+                    const response = await this.sendToAPI(message);
+                    
+                    if (!this.shouldStopGeneration()) {
+                        this.hideTypingIndicator();
+                        
+                        const messageId = await this.addMessage('', false, true);
+                        this.typewriterEffect(messageId, response);
+                    }
+                    
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        console.error('Error:', error);
+                        
+                        this.hideTypingIndicator();
+                        
+                        let errorMessage = 'Maaf, terjadi kesalahan: ';
+                        
+                        if (error.message.includes('network') || error.message.includes('Failed to fetch')) {
+                            errorMessage += 'Masalah koneksi internet. Cek koneksi Anda.';
+                        } else {
+                            errorMessage += error.message;
+                        }
+                        
+                        this.addMessage(errorMessage, false);
+                    }
+                    
+                    this.hideTypingIndicator();
+                    this.setGeneratingState(false);
+                }
+            }
+
+            stopGeneration() {
+                if (this.currentAbortController) {
+                    this.currentAbortController.abort();
+                }
+                
+                if (this.currentTypewriterInterval) {
+                    clearInterval(this.currentTypewriterInterval);
+                    this.currentTypewriterInterval = null;
+                }
+                
+                this.hideTypingIndicator();
+                this.setGeneratingState(false);
+            }
+
+            shouldStopGeneration() {
+                return this.currentAbortController && this.currentAbortController.signal.aborted;
+            }
+
+            setGeneratingState(isGenerating) {
+                this.isGenerating = isGenerating;
+                
+                this.sendBtn.style.display = isGenerating ? 'none' : 'flex';
+                this.stopBtn.style.display = isGenerating ? 'flex' : 'none';
+                
+                this.inputBox.disabled = isGenerating;
+                this.inputBox.style.opacity = isGenerating ? '0.6' : '1';
+                
+                if (!isGenerating) {
+                    this.inputBox.focus();
+                    this.currentAbortController = null;
+                }
+            }
+
+            async sendToAPI(message) {
+                const fullPrompt = `${this.systemPrompt}\n\nPertanyaan: ${message}`;
+                
+                console.log('Sending request to ChatGPT API...');
+
+                try {
+                    const response = await fetch(`${this.API_URL}?text=${encodeURIComponent(fullPrompt)}`, {
+                        method: 'GET',
+                        signal: this.currentAbortController.signal
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API Error (${response.status}): ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('API Response:', data);
+                    
+                    if (data.status && data.result) {
+                        console.log('Response received successfully');
+                        return data.result;
+                    } else {
+                        throw new Error('Format response tidak valid dari API');
+                    }
+                    
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        throw error;
+                    }
+                    
+                    console.error('API Error:', error);
+                    
+                    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                        throw new Error('Gagal koneksi ke API. Cek koneksi internet Anda.');
+                    }
+                    
+                    throw error;
+                }
+            }
+
+            typewriterEffect(elementId, text, speed = 20) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                element.textContent = '';
+                let index = 0;
+                
+                if (this.currentTypewriterInterval) {
+                    clearInterval(this.currentTypewriterInterval);
+                }
+                
+                this.currentTypewriterInterval = setInterval(() => {
+                    if (index < text.length && !this.shouldStopGeneration()) {
+                        element.textContent += text.charAt(index);
+                        index++;
+                        this.scrollToBottom();
+                    } else {
+                        clearInterval(this.currentTypewriterInterval);
+                        this.currentTypewriterInterval = null;
+                        this.setGeneratingState(false);
+                    }
+                }, speed);
+            }
+
+            addMessage(text, isUser, needsTypewriter = false) {
+                return new Promise((resolve) => {
+                    const messageId = `message-${++this.messageCounter}`;
+
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+                    messageDiv.dataset.messageId = messageId;
+                    
+                    messageDiv.innerHTML = `
+                        <div class="message-avatar">${isUser ? 'U' : 'AI'}</div>
+                        <div class="message-content" id="${messageId}">${needsTypewriter ? '' : text}</div>
+                    `;
+
+                    const welcomeMsg = this.chatContainer.querySelector('.welcome-message');
+                    if (welcomeMsg) {
+                        welcomeMsg.remove();
+                    }
+
+                    this.chatContainer.appendChild(messageDiv);
+                    this.scrollToBottom();
+                    
+                    resolve(needsTypewriter ? messageId : null);
+                });
+            }
+
+            showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message assistant';
+                typingDiv.id = 'typingIndicator';
+                
+                typingDiv.innerHTML = `
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                        <div class="typing-indicator show">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                `;
+                
+                this.chatContainer.appendChild(typingDiv);
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                const typing = document.getElementById('typingIndicator');
+                if (typing) {
+                    typing.remove();
+                }
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+                }, 100);
+            }
+
+            static initialize() {
+                return new ThanAssistant();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = ThanAssistant.initialize();
+            window.thanAssistant = app;
+            
+            console.log('%cThanAssistant (ChatGPT) Loaded Successfully!', 'color: #4a90e2; font-size: 16px; font-weight: bold;');
+        });
+    </script>
+</body>
+</html>
