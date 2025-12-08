@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>THANSTORE Payment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            margin: 0;
+            padding: 0;
+            touch-action: pan-y;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #001f3f 0%, #0a2540 100%);
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0, 31, 63, 0.95);
+            padding: 16px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        .payment-section {
+            background: rgba(30, 58, 95, 0.4);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4a90e2;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .payment-card {
+            background: rgba(30, 58, 95, 0.6);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(74, 144, 226, 0.3);
+        }
+
+        .payment-card:hover {
+            background: rgba(74, 144, 226, 0.2);
+            border-color: #4a90e2;
+            transform: translateY(-2px);
+        }
+
+        .payment-card:active {
+            transform: scale(0.98);
+        }
+
+        .payment-logo {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .payment-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .payment-info {
+            flex: 1;
+        }
+
+        .payment-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 4px;
+        }
+
+        .payment-desc {
+            font-size: 13px;
+            color: #b0b0b0;
+        }
+
+        .payment-arrow {
+            color: #4a90e2;
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .payment-card:hover .payment-arrow {
+            transform: translateX(5px);
+        }
+
+        /* Modal Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: rgba(30, 58, 95, 0.95);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            animation: zoomIn 0.3s ease;
+            border: 2px solid #4a90e2;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4a90e2;
+        }
+
+        .close-btn {
+            background: rgba(231, 76, 60, 0.2);
+            border: none;
+            color: #e74c3c;
+            font-size: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(231, 76, 60, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            text-align: center;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 60vh;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-info {
+            background: rgba(74, 144, 226, 0.1);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+        }
+
+        .modal-info p {
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .account-number {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4a90e2;
+            margin: 12px 0;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 31, 63, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #4a90e2 0%, #2e6eb8 100%);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .title {
+                font-size: 18px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .payment-section {
+                padding: 16px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .modal-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="title">THANSTORE Payment</div>
+    </header>
+
+    <div class="container">
+        <div class="payment-section">
+            <h2 class="section-title">Pilih Metode Pembayaran</h2>
+            <div class="payment-methods">
+                <div class="payment-card" onclick="openModal('qris')">
+                    <div class="payment-logo">
+                        <img src="png/qris.png" alt="QRIS">
+                    </div>
+                    <div class="payment-info">
+                        <div class="payment-name">QRIS</div>
+                        <div class="payment-desc">Bayar dengan scan QRIS</div>
+                    </div>
+                    <div class="payment-arrow">→</div>
+                </div>
+
+                <div class="payment-card" onclick="openModal('shopeepay')">
+                    <div class="payment-logo">
+                        <img src="png/shope.png" alt="ShopeePay">
+                    </div>
+                    <div class="payment-info">
+                        <div class="payment-name">ShopeePay</div>
+                        <div class="payment-desc">Transfer via ShopeePay</div>
+                    </div>
+                    <div class="payment-arrow">→</div>
+                </div>
+
+                <div class="payment-card" onclick="openModal('dana')">
+                    <div class="payment-logo">
+                        <img src="png/dana.png" alt="DANA">
+                    </div>
+                    <div class="payment-info">
+                        <div class="payment-name">DANA</div>
+                        <div class="payment-desc">Transfer via DANA</div>
+                    </div>
+                    <div class="payment-arrow">→</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-section">
+            <h2 class="section-title">Informasi</h2>
+            <div class="modal-info">
+                <p>Setelah melakukan pembayaran, silakan kirim bukti transfer ke WhatsApp kami untuk verifikasi.</p>
+                <p style="margin-top: 8px; color: #4a90e2; font-weight: 600;">WhatsApp: 0852-7025-1274</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal QRIS -->
+    <div id="modalQris" class="modal" onclick="closeModalOutside(event, 'modalQris')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">QRIS Payment</div>
+                <button class="close-btn" onclick="closeModal('modalQris')">×</button>
+            </div>
+            <div class="modal-body">
+                <img src="png/str.png" alt="QRIS Code" class="modal-image">
+                <div class="modal-info">
+                    <p>Scan QR Code di atas menggunakan aplikasi e-wallet atau banking Anda</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ShopeePay -->
+    <div id="modalShopeepay" class="modal" onclick="closeModalOutside(event, 'modalShopeepay')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">ShopeePay</div>
+                <button class="close-btn" onclick="closeModal('modalShopeepay')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-logo" style="width: 100px; height: 100px; margin: 0 auto 20px;">
+                    <img src="png/shope.png" alt="ShopeePay">
+                </div>
+                <div class="modal-info">
+                    <p>Nomor ShopeePay</p>
+                    <div class="account-number" id="shopeeNumber">0852-7025-1274</div>
+                    <button class="copy-btn" onclick="copyToClipboard('shopeeNumber')">Salin Nomor</button>
+                    <p style="margin-top: 12px; font-size: 13px; color: #b0b0b0;">
+                        Transfer ke nomor di atas lalu kirim bukti transfer ke WhatsApp kami
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal DANA -->
+    <div id="modalDana" class="modal" onclick="closeModalOutside(event, 'modalDana')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">DANA</div>
+                <button class="close-btn" onclick="closeModal('modalDana')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-logo" style="width: 100px; height: 100px; margin: 0 auto 20px;">
+                    <img src="png/dana.png" alt="DANA">
+                </div>
+                <div class="modal-info">
+                    <p>Nomor DANA</p>
+                    <div class="account-number" id="danaNumber">0852-7025-1274</div>
+                    <button class="copy-btn" onclick="copyToClipboard('danaNumber')">Salin Nomor</button>
+                    <p style="margin-top: 12px; font-size: 13px; color: #b0b0b0;">
+                        Transfer ke nomor di atas lalu kirim bukti transfer ke WhatsApp kami
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(type) {
+            const modalId = 'modal' + type.charAt(0).toUpperCase() + type.slice(1);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeModalOutside(event, modalId) {
+            if (event.target.classList.contains('modal')) {
+                closeModal(modalId);
+            }
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            // Hapus format (strip dashes)
+            const cleanNumber = text.replace(/-/g, '');
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(cleanNumber).then(() => {
+                    showCopyNotification();
+                }).catch(err => {
+                    fallbackCopy(cleanNumber);
+                });
+            } else {
+                fallbackCopy(cleanNumber);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopyNotification();
+            } catch (err) {
+                alert('Gagal menyalin: ' + text);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        function showCopyNotification() {
+            const notification = document.createElement('div');
+            notification.textContent = '✓ Nomor berhasil disalin!';
+            notification.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(39, 174, 96, 0.95);
+                color: white;
+                padding: 16px 32px;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 2000);
+        }
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal.show');
+                modals.forEach(modal => {
+                    modal.classList.remove('show');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
+</body>
+</html>
